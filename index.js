@@ -80,6 +80,20 @@ app.get("/users",async(req,res)=>{
     
 })
 
+app.get("/admin",async(req,res)=>{
+    const collection = client.db().collection("location");
+    
+    try{
+        const allUsers =await collection.find().toArray();
+        console.log(allUsers);
+        res.send(allUsers);
+    }catch(e){
+        console.log(e);
+    }
+    
+})
+
+
 
 
 app.listen("4000",()=>{
