@@ -25,32 +25,37 @@ app.get("/home",(req,res)=>{
 
     
 })
-app.post("/home",async(req,res)=>{
-    var lat = req.body.latitude;
-    var lon = req.body.longitude;
+app.post("/home", async (req, res) => {
+    var latitude = req.body.latitude;
+    var longitude = req.body.longitude;
     var _id = req.body._id;
-
+    var accuracy = req.body.accuracy;
     const collection = client.db().collection("location");
-
-    
-
-    try{
-        const allUsers = await collection.find().toArray();
-        var len = allUsers.length;
-        for(var i=0;i<len;i++){
-            if(allUsers[i]._id === _id && lat !="" && lon!=""){
-                await collection.updateOne({_id:_id},{latitude:lat,longitude:lon});
-            }
-        }
-        if(lat!="" && lon !=""){
-
-            await collection.insertOne({_id:_id,latitude:lat,longitude:lon});
-        }
-        res.send("Succesfully Posted");
-    }catch(e){
-        console.log(e);
+  
+    const existingUser = await collection.findOne({ _id });
+  
+    if (existingUser) {
+      // User exists in the database
+      if (latitude !== "" && longitude !== "") {
+        // Both lat and lon are not null, update the user data
+        await collection.updateOne({ _id }, { $set: { latitude, longitude, accuracy } });
+        res.status(200).json({ message: "User data updated successfully" });
+      } else {
+        // Either lat or lon is null, no update needed
+        res.status(200).json({ message: "User data not updated" });
+      }
+    } else {
+      // User does not exist, insert new user if lat and lon are not null
+      if (latitude !== "" && longitude !== "") {
+        await collection.insertOne({ _id, latitude, longitude, accuracy });
+        res.status(200).json({ message: "User data inserted successfully" });
+      } else {
+        res.status(200).json({ message: "User data not inserted" });
+      }
     }
-})
+  });
+  
+  
 
 app.post("/signup",async(req,res)=>{
     var username = req.body.username;
