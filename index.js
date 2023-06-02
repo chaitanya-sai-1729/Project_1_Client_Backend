@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
-const {MongoClient,ServerApiVersion} = require("mongodb");
+const {MongoClient,ServerApiVersion, ConnectionClosedEvent} = require("mongodb");
 const uri = "mongodb+srv://chaitanyasaim5:chaitanyasai@tracking.5sl6mtx.mongodb.net/Tracking";
 const client = new MongoClient(uri,{
     useNewUrlParser:true,
@@ -96,6 +96,36 @@ app.get("/admin",async(req,res)=>{
         console.log(e);
     }
     
+})
+
+app.post("/admins",async(req,res)=>{
+  const adminname = req.body.adminname;
+  const password = req.body.password;
+
+  const collection = client.db().collection("admins");
+
+  try{
+    await collection.insertOne({_id:adminname,password:password});
+    res.send("Succesfully Posted");
+
+  }catch(e){
+    console.log(e);
+  }
+
+  
+})
+
+app.get("/admins",async(req,res)=>{
+  const collection = client.db().collection("admins");
+
+  try{
+    const allAdmins = await collection.find().toArray();
+    console.log(allAdmins);
+    res.send(allAdmins);
+
+  }catch(e){
+    console.log(e);
+  }
 })
 
 
